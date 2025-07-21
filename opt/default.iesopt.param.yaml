@@ -1,0 +1,22 @@
+# ----------------- SOLAR PV ------------------
+pv_curtailment_factor: 1.0      # [1] Factor by how much the PV can be curtailed related to its current generation
+
+# ------------------ BATTERY ------------------
+
+battery_p: null            # [kW] Rated power of the battery
+battery_e: null            # [kWh] Energy capacity of the battery
+battery_eta: null          # [1] Total roundtrip efficiency of the battery
+battery_loss: null         # [1] Self-discharge rate of the battery, per hour
+battery_soc_min: null      # [1] Minimum state of charge of the battery
+battery_soc_max: null      # [1] Maximum state of charge of the battery
+battery_soc_t0: null       # [1] Initial state of charge of the battery
+battery_vom: null          # [EUR/kWh] Costs associated with charging+discharging the battery by 1 kWh
+
+# --------------- GRID TARIFFS ----------------
+
+grid_p_max_consume: null   # [kW] Maximum rated power of the grid connection (consumption)
+grid_p_max_feedin: null    # [kW] Maximum rated power of the grid connection (feed-in)
+grid_p_peak_consume: null  # [kW] Already utilized peak power of the grid connection during the current month
+grid_cost_e_consume: null  # [EUR/kWh] Energy cost of consuming electricity from the grid
+grid_cost_e_feedin: null   # [EUR/kWh] Energy cost of feeding electricity into the grid
+grid_cost_p_consume: null  # [EUR/kW] Power cost of the grid connection, for the current month (so divided by 12!)

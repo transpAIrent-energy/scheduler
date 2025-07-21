@@ -1,0 +1,169 @@
+# ╭───────────────────────────────────────────────────────────────────────────╮
+# │ TOP LEVEL CONFIGURATION, SETTINGS, AND PARAMETERS                         │
+# ╰───────────────────────────────────────────────────────────────────────────╯
+
+parameters: default.iesopt.param.yaml
+
+config:
+  general:
+    version:
+      core: 2.8.0
+    name:
+      model: operational-planner
+      scenario: default
+    verbosity:
+      core: warning
+      progress: off
+      solver: on
+    performance:
+      logfile: false
+  optimization:
+    problem_type: LP
+    snapshots:
+      weights: 0.25
+    solver:
+      name: highs
+      log: false
+  results:
+    enabled: true
+
+carriers:
+  electricity: {}
+
+# ╭───────────────────────────────────────────────────────────────────────────╮
+# │ ASSETS (COMPONENTS) DEFITIONS                                             │
+# ╰───────────────────────────────────────────────────────────────────────────╯
+
+components:
+  
+  # ------------------ MARKETS ------------------
+
+  market_da_buy:
+    type: Profile
+    carrier: electricity
+    node_to: grid_ext
+    mode: create
+    cost: price@data
+
+  market_da_sell:
+    type: Profile
+    carrier: electricity
+    node_from: grid_ext
+    mode: destroy
+    cost: -1.0 * price@data
+
+  # ------------------- GRIDS -------------------
+  
+  grid_ext:
+    type: Node
+    carrier: electricity
+  
+  grid_int:
+    type: Node
+    carrier: electricity
+
+  # A virtual Node that the demand draws from.
+  grid_int_demand:
+    type: Node
+    carrier: electricity
+
+  # The virtual demand Node can only consume from the internal grid.
+  grid_int_demand_conn:
+    type: Connection
+    node_from: grid_int
+    node_to: grid_int_demand
+    lb: 0
+
+  # --------------- GRID TARIFFS ----------------
+
+  grid_con_consume_limit:
+    type: Decision
+    lb: 0
+    ub: <grid_p_max_consume> - <grid_p_peak_consume>
+    cost: <grid_cost_p_consume>
+
+  grid_con_consume:
+    type: Connection
+    node_from: grid_ext
+    node_to: grid_int
+    lb: 0
+    ub: <grid_p_peak_consume> + grid_con_consume_limit:value
+    cost: <grid_cost_e_consume>
+  
+  grid_con_feedin:
+    type: Connection
+    node_from: grid_int
+    node_to: grid_ext
+    lb: 0
+    ub: <grid_p_max_feedin>
+    cost: <grid_cost_e_feedin>
+
+  # -------------------- PV ---------------------
+
+  pv:
+    type: Profile
+    carrier: electricity
+    node_to: grid_int
+    value: pv_s@data + pv_l@data
+  
+  # NOTE: `pv_***@data` can contain negative values (consumption), which is why we need to limit the remaining
+  #       `ub` using `max(0, ...)` to prevent infeasible models as soon as `ub = pv_***@@data < 0 = lb`.
+  pv_curtailment:
+    type: Profile
+    carrier: electricity
+    node_from: grid_int
+    mode: ranged
+    lb: 0
+    ub: <pv_curtailment_factor> * max(0, pv_s@data + pv_l@data)
+  
+  # ------------------ DEMAND -------------------
+
+  demand_total:
+    type: Profile
+    carrier: electricity
+    node_from: grid_int_demand
+    value: demand_s@data + demand_l@data + demand_g@data
+
+  # ------------------ BATTERY ------------------
+
+  battery_storage:
+    type: Node
+    carrier: electricity
+    has_state: true
+    state_lb: <battery_soc_min> * <battery_e>
+    state_ub: <battery_soc_max> * <battery_e>
+    state_percentage_loss: <battery_loss>
+    state_cyclic: geq
+    state_initial: <battery_soc_t0> * <battery_e>
+  
+  battery_charging:
+    type: Unit
+    inputs: {electricity: grid_int}
+    outputs: {electricity: battery_storage}
+    conversion: 1 electricity -> sqrt(<battery_eta>) electricity
+    marginal_cost: (<battery_vom> / 2.0) per in:electricity
+    capacity: <battery_p> in:electricity
+
+  battery_discharging:
+    type: Unit
+    inputs: {electricity: battery_storage}
+    outputs: {electricity: grid_int_demand}
+    conversion: 1.0 / sqrt(<battery_eta>) electricity -> 1 electricity
+    marginal_cost: (<battery_vom> / 2.0) per out:electricity
+    capacity: <battery_p> out:electricity
+
+  # ---------------- FEASIBILITY ----------------
+  
+  feasibility_create:
+    type: Profile
+    carrier: electricity
+    node_to: grid_int
+    mode: create
+    cost: 1000.0
+
+  feasibility_destroy:
+    type: Profile
+    carrier: electricity
+    node_from: grid_int
+    mode: destroy
+    cost: 1000.0

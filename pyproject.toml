@@ -1,0 +1,18 @@
+[project]
+name = "scheduler"
+version = "0.1.0"
+description = "A day-ahead operational scheduler for the transpAIrent.energy project."
+authors = [
+  {name = "Stefan Strömer", email = "8915976+sstroemer@users.noreply.github.com"},
+]
+license-files = ["LICENSE"]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "iesopt>=2.8.0",
+    "pandas>=2.3.1",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"

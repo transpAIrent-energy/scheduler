@@ -40,6 +40,29 @@ grid_cost_e_feedin=0.123   # [EUR/kWh] Energy cost of feeding electricity into t
 grid_cost_p_consume=0.123  # [EUR/kW] Power cost of the grid connection, for the current month (so divided by 12!)
 ```
 
+## Model description
+
+### Results
+
+Results are - as most values - given in `kW` for setpoints, etc., and unitless (0-1) for the state of charge (SoC). The
+SoC is given as a fraction of the battery's total energy capacity (so `0.9` refers to the upper bound of the allowed
+range of operation if `battery_soc_max` is set to `0.9`).
+
+This is especially important for schedule related results, where the 15-minute intervals implicate that results (in
+terms of power) are not (numerically) equal to the corresponding energy values (in kWh) for the same time period.
+
+### Storage levels
+
+The scheduler currently starts at `00:00` and runs until the end of the passed data window, forcing the storage to have
+at least the initial state of charge at the end of the scheduling period (ending with more stored energy is allowed).
+
+### Storage & self-consumption
+
+The storage is currently configured to not allow discharging to sell on the day-ahead market - assuming that forecasts
+are not accurate enough to ensure large enough spreads (when accounting for grid costs, degradation, etc.) to allow
+trading spreads across the day. This is done by only allowing it to discharge to cover the local demand. Charging is
+allowed from either the PV or the grid.
+
 ## Example usage
 
 Put the following into `example.py`:
@@ -51,7 +74,9 @@ from src.scheduler import get_day_ahead_schedule
 
 data = make_example_data()
 data = normalize_to_eom(data)
+
 schedule = get_day_ahead_schedule(data, battery_soc_t0=0.5, grid_p_peak_consume=100)
+
 print(schedule.head())
 ```
 

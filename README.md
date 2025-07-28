@@ -92,3 +92,15 @@ Then run:
 ```bash
 uv run example.py
 ```
+
+which should print the first few rows of the resulting schedule, similar to:
+
+```console
+                            schedule  battery_setpoint  battery_soc
+time                                                               
+2025-06-02 00:00:00+02:00 -205.62232          0.000000     0.500000
+2025-06-02 00:15:00+02:00  123.41780        101.236946     0.499925
+2025-06-02 00:30:00+02:00  123.41780        158.318582     0.495171
+2025-06-02 00:45:00+02:00 -990.00000        -39.164461     0.487780
+2025-06-02 01:00:00+02:00  123.41780       -390.498286     0.489336
+```

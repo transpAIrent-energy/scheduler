@@ -16,6 +16,13 @@ Then, navigate to the project directory and run the following command to set up 
 uv sync
 ```
 
+> [!TIP]
+> If possible it's best to trigger the one-time Julia setup (environment creation, package installation,
+> precompilation, etc.) manually once since that step can take a few minutes. You can do this by launching Python in
+> the virtual environment (e.g., by doing `uv run python`) and then importing the `iesopt` package once (by executing
+> `import iesopt`). This will ensure that the environment is created and all packages are installed and precompiled,
+> which is then re-used when using the same environment.
+
 ## Parameters (.env)
 
 Add a `.env` file in the project root directory with the following parameters:

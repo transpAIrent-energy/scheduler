@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     # argument handling
     parser = argparse.ArgumentParser(description="Scheduler Replay Request from log")
-    parser.add_argument("request_file", nargs="?", help=f"Path to logged JSON file")
+    parser.add_argument("request_file", help=f"Path to logged JSON file")
     args = parser.parse_args()
     request_path = Path(args.request_file)
     if not request_path.is_file():

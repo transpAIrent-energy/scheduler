@@ -24,7 +24,8 @@ class ScheduleInput(BaseModel):
 
 
 class ScheduleOutput(BaseModel):
-    data: List[Dict[str, float]]
+    data: List[Dict[str, float]] | None = None
+    error: str | None = None
 
 
 app = FastAPI()
@@ -33,18 +34,22 @@ logger = logging.getLogger('uvicorn.info')
 
 @app.post("/schedule", response_model=ScheduleOutput)
 async def schedule(input_data: ScheduleInput):
-    config_path = str((Path(".") / "opt").resolve())
-    data = pd.DataFrame(input_data.data)
-    parameters = input_data.parameters
-    start_time = input_data.start_time
-    logger.info(f"Received scheduling request with {len(data)} data points starting at {start_time.isoformat()} "
-                f"and {len(parameters)} parameters")
-    data = normalize_to_eom(data, start_time)
-    logger.info(f"Normalized data from {start_time.isoformat()} to end of month --> {len(data)} datapoints")
-    result_data = get_day_ahead_schedule(data, parameters, config_path)
-    logger.info(f"Scheduling completed, returning {len(result_data)} result data points")
-    result_data = result_data.to_dict(orient="records")
-    return ScheduleOutput(data=result_data)
+    try:
+        config_path = str((Path(".") / "opt").resolve())
+        data = pd.DataFrame(input_data.data)
+        parameters = input_data.parameters
+        start_time = input_data.start_time
+        logger.info(f"Received scheduling request with {len(data)} data points starting at {start_time.isoformat()} "
+                    f"and {len(parameters)} parameters")
+        data = normalize_to_eom(data, start_time)
+        logger.info(f"Normalized data from {start_time.isoformat()} to end of month --> {len(data)} datapoints")
+        result_data = get_day_ahead_schedule(data, parameters, config_path)
+        logger.info(f"Scheduling completed, returning {len(result_data)} result data points")
+        result_data = result_data.to_dict(orient="records")
+        return ScheduleOutput(data=result_data)
+    except Exception as e:
+        logger.error(f"Error running AIT scheduler: {e}", exc_info=e)
+        return ScheduleOutput(error=str(e))
 
 
 @app.get("/healthcheck")

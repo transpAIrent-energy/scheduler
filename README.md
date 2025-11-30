@@ -2,6 +2,8 @@
 
 A day-ahead operational scheduler for the transpAIrent.energy project.
 
+ToDo: updated docs to new FastAPI Webservice interface
+
 ## Setup
 
 Clone this repository, e.g., by doing:

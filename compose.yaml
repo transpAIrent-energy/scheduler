@@ -1,0 +1,18 @@
+services:
+  aitscheduler:
+    build:
+      context: .
+      target: base
+    image: aitscheduler:base
+    container_name: spm-dev-aitscheduler
+    env_file:
+      - .env
+    ports:
+      - "28000:8000"
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:8000/healthcheck"]
+        interval: 5s
+        timeout: 10s
+        retries: 5
+        start_period: 600s
+        start_interval: 10s

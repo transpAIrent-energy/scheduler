@@ -8,7 +8,7 @@
 
 import logging
 from typing import List, Dict
-from fastapi import FastAPI
+from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel
 from datetime import datetime
 import pandas as pd
@@ -16,6 +16,7 @@ from pathlib import Path
 from src.util import normalize_to_eom
 from src.scheduler import get_day_ahead_schedule
 
+AIT_SCHEDULER1_TOKEN = "aIAKUZETGZKZa6t4pz7aet712456"
 
 class ScheduleInput(BaseModel):
     start_time: datetime  # Start time of the scheduling period
@@ -33,7 +34,9 @@ logger = logging.getLogger('uvicorn.info')
 
 
 @app.post("/schedule", response_model=ScheduleOutput)
-async def schedule(input_data: ScheduleInput):
+async def schedule(input_data: ScheduleInput, x_scheduler_token: str = Header(None)):
+    if x_scheduler_token != AIT_SCHEDULER1_TOKEN:
+        raise HTTPException(status_code=403, detail="Unauthorized - invalid token")
     try:
         config_path = str((Path(".") / "opt").resolve())
         data = pd.DataFrame(input_data.data)

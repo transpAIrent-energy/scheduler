@@ -1,7 +1,15 @@
-# ----------------- SOLAR PV ------------------
-pv_curtailment_factor: 1.0      # [1] Factor by how much the PV can be curtailed related to its current generation
+# ----------------------------------------------------------------------------------------------------------------------
+# --- GENERAL & TUNING -------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
-# ------------------ BATTERY ------------------
+pv_curtailment_factor: 1.0         # [1] Factor by how much the PV can be curtailed related to its current generation
+self_consumption_penalty: null     # [EUR/kWh] Incentive (penalty) to share electricity with Brunn/Kirchschlag
+battery_soc_softmin: null          # [1] Soft minimum state of charge of the battery (penalty applied if below this value)
+battery_soc_softmin_penalty: null  # [EUR/kWh/h] Penalty for each kWh below the soft minimum state of charge of the battery, calculated as "applied at this cost for each hour"
+
+# ----------------------------------------------------------------------------------------------------------------------
+# --- BATTERY ----------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 battery_p: null            # [kW] Rated power of the battery
 battery_e: null            # [kWh] Energy capacity of the battery
@@ -12,11 +20,26 @@ battery_soc_max: null      # [1] Maximum state of charge of the battery
 battery_soc_t0: null       # [1] Initial state of charge of the battery
 battery_vom: null          # [EUR/kWh] Costs associated with charging+discharging the battery by 1 kWh
 
-# --------------- GRID TARIFFS ----------------
+# ----------------------------------------------------------------------------------------------------------------------
+# --- GRID TARIFFS -----------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
-grid_p_max_consume: null   # [kW] Maximum rated power of the grid connection (consumption)
-grid_p_max_feedin: null    # [kW] Maximum rated power of the grid connection (feed-in)
-grid_p_peak_consume: null  # [kW] Already utilized peak power of the grid connection during the current month
-grid_cost_e_consume: null  # [EUR/kWh] Energy cost of consuming electricity from the grid
-grid_cost_e_feedin: null   # [EUR/kWh] Energy cost of feeding electricity into the grid
-grid_cost_p_consume: null  # [EUR/kW] Power cost of the grid connection, for the current month (so divided by 12!)
+# Bromberg:
+bromberg_grid_p_max_consume: null   # [kW] Maximum rated power of the grid connection (consumption)
+bromberg_grid_p_max_feedin: null    # [kW] Maximum rated power of the grid connection (feed-in)
+bromberg_grid_p_peak_consume: null  # [kW] Already utilized peak power of the grid connection during the current month
+bromberg_grid_cost_e_consume: null  # [EUR/kWh] Energy cost of consuming electricity from the grid
+bromberg_grid_cost_e_feedin: null   # [EUR/kWh] Energy cost of feeding electricity into the grid
+bromberg_grid_cost_p_consume: null  # [EUR/kW/m] Power cost of the grid connection per month
+
+# Kirchschlag:
+kirchschlag_grid_p_max_consume: null   # [kW] Maximum rated power of the grid connection (consumption)
+kirchschlag_grid_p_peak_consume: null  # [kW] Already utilized peak power of the grid connection during the current month
+kirchschlag_grid_cost_e_consume: null  # [EUR/kWh] Energy cost of consuming electricity from the grid
+kirchschlag_grid_cost_p_consume: null  # [EUR/kW/m] Power cost of the grid connection per month
+
+# Brunn:
+brunn_grid_p_max_consume: null   # [kW] Maximum rated power of the grid connection (consumption)
+brunn_grid_p_peak_consume: null  # [kW] Already utilized peak power of the grid connection during the current month
+brunn_grid_cost_e_consume: null  # [EUR/kWh] Energy cost of consuming electricity from the grid 
+brunn_grid_cost_p_consume: null  # [EUR/kW/m] Power cost of the grid connection per month

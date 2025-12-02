@@ -1,0 +1,41 @@
+components:
+  # ------------------- GRIDS -------------------
+  
+  grid_ext:
+    type: Node
+    carrier: electricity
+  
+  grid_int:
+    type: Node
+    carrier: electricity
+
+  # --------------- GRID TARIFFS ----------------
+
+  grid_con_consume_limit:
+    type: Decision
+    lb: 0
+    ub: <kirchschlag_grid_p_max_consume> - <kirchschlag_grid_p_peak_consume>
+    cost: <kirchschlag_grid_cost_p_consume>
+
+  grid_con_consume:
+    type: Connection
+    node_from: <self>.grid_ext
+    node_to: <self>.grid_int
+    lb: 0
+    ub: <kirchschlag_grid_p_peak_consume> + <self>.grid_con_consume_limit:value
+    cost: <kirchschlag_grid_cost_e_consume>
+
+  # ------------------ DEMAND -------------------
+
+  demand:
+    type: Profile
+    carrier: electricity
+    node_from: <self>.grid_int
+    value: demand_kirchschlag@data
+  
+  feasibility_create:
+    type: Profile
+    carrier: electricity
+    node_to: <self>.grid_int
+    mode: create
+    cost: 100.0

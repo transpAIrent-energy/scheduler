@@ -51,8 +51,8 @@ def make_example_data(count: int) -> pd.DataFrame:
             "pv_l": rng.uniform(0, 1110, count),
             "demand_bromberg_s": rng.uniform(50, 300, count),
             "demand_bromberg_l": rng.uniform(0, 600, count),
-            "demand_brunn": rng.uniform(0, 150, count),
-            "demand_kirchschlag": rng.uniform(0, 150, count),
+            "demand_brunn": rng.uniform(0, 1800, count),
+            "demand_kirchschlag": rng.uniform(0, 450, count),
             "price": rng.uniform(0.02, 0.15, count),
         }
     )
@@ -86,13 +86,13 @@ if __name__ == "__main__":
         "bromberg_grid_cost_e_feedin": 0.0,
         "bromberg_grid_cost_p_consume": 6.19633,
         # grid tariff parameters (Brunn)
-        "brunn_grid_p_max_consume": 1121.0,          # TODO
-        "brunn_grid_cost_e_consume": 0.03324,        # TODO
-        "brunn_grid_cost_p_consume": 6.19633,        # TODO
+        "brunn_grid_p_max_consume": 1800.0,          # TODO: check
+        "brunn_grid_cost_e_consume": 0.03324,        # TODO: change
+        "brunn_grid_cost_p_consume": 6.19633,        # TODO: change
         # grid tariff parameters (Kirchschlag)
-        "kirchschlag_grid_p_max_consume": 1121.0,    # TODO
-        "kirchschlag_grid_cost_e_consume": 0.03324,  # TODO
-        "kirchschlag_grid_cost_p_consume": 6.19633,  # TODO
+        "kirchschlag_grid_p_max_consume": 450.0,     # TODO: check
+        "kirchschlag_grid_cost_e_consume": 0.03324,  # TODO: change
+        "kirchschlag_grid_cost_p_consume": 6.19633,  # TODO: change
     }
     config_path = str((Path(".") / "opt").resolve())
     data = normalize_to_eom(data, start_time)

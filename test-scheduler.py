@@ -84,15 +84,15 @@ if __name__ == "__main__":
         "bromberg_grid_p_max_feedin": 990.0,
         "bromberg_grid_cost_e_consume": 0.03324,
         "bromberg_grid_cost_e_feedin": 0.0,
-        "bromberg_grid_cost_p_consume": 6.19633,
+        "bromberg_grid_cost_p_consume": 74.356 / 12,
         # grid tariff parameters (Brunn)
         "brunn_grid_p_max_consume": 1800.0,          # TODO: check
-        "brunn_grid_cost_e_consume": 0.03324,        # TODO: change
-        "brunn_grid_cost_p_consume": 6.19633,        # TODO: change
+        "brunn_grid_cost_e_consume": 0.03242,
+        "brunn_grid_cost_p_consume": 63.796 / 12,
         # grid tariff parameters (Kirchschlag)
         "kirchschlag_grid_p_max_consume": 450.0,     # TODO: check
-        "kirchschlag_grid_cost_e_consume": 0.03324,  # TODO: change
-        "kirchschlag_grid_cost_p_consume": 6.19633,  # TODO: change
+        "kirchschlag_grid_cost_e_consume": 0.03324,
+        "kirchschlag_grid_cost_p_consume": 74.356 / 12,
     }
     config_path = str((Path(".") / "opt").resolve())
     data = normalize_to_eom(data, start_time)

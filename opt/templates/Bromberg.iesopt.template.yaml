@@ -15,7 +15,7 @@ components:
     type: Decision
     lb: 0
     ub: <bromberg_grid_p_max_consume> - <bromberg_grid_p_peak_consume>
-    cost: <bromberg_grid_cost_p_consume>
+    cost: <bromberg_grid_cost_p_consume> * <monthly_scale>
 
   grid_con_consume:
     type: Connection

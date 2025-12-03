@@ -15,7 +15,7 @@ components:
     type: Decision
     lb: 0
     ub: <brunn_grid_p_max_consume> - <brunn_grid_p_peak_consume>
-    cost: <brunn_grid_cost_p_consume>
+    cost: <brunn_grid_cost_p_consume> * <monthly_scale>
 
   grid_con_consume:
     type: Connection

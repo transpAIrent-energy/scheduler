@@ -15,7 +15,7 @@ components:
     type: Decision
     lb: 0
     ub: <kirchschlag_grid_p_max_consume> - <kirchschlag_grid_p_peak_consume>
-    cost: <kirchschlag_grid_cost_p_consume>
+    cost: <kirchschlag_grid_cost_p_consume> * <monthly_scale>
 
   grid_con_consume:
     type: Connection

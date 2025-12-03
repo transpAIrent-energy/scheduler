@@ -7,7 +7,7 @@ parameters: default.iesopt.param.yaml
 config:
   general:
     version:
-      core: 2.8.0
+      core: 2.9.1
     name:
       model: operational-planner
       scenario: default
@@ -26,9 +26,18 @@ config:
       log: false
   results:
     enabled: true
+  paths:
+    templates: templates/
 
 carriers:
-  electricity: {}
+  electricity: {}  # kW  |  kWh
+  # NOTE: costs are given in EUR
+
+addons:
+  BatterySoftMin:
+    total_capacity: <battery_e>
+    soc_min: <battery_soc_softmin>
+    penalty: <battery_soc_softmin_penalty>
 
 # ╭───────────────────────────────────────────────────────────────────────────╮
 # │ ASSETS (COMPONENTS) DEFITIONS                                             │
@@ -41,129 +50,42 @@ components:
   market_da_buy:
     type: Profile
     carrier: electricity
-    node_to: grid_ext
+    node_to: grid_market
     mode: create
-    cost: price@data
+    cost: price@data + <self_consumption_penalty>
 
   market_da_sell:
     type: Profile
     carrier: electricity
-    node_from: grid_ext
+    node_from: grid_market
     mode: destroy
-    cost: -1.0 * price@data
+    cost: (-1.0 * price@data) + <self_consumption_penalty>
 
-  # ------------------- GRIDS -------------------
-  
-  grid_ext:
+  grid_market:
     type: Node
     carrier: electricity
   
-  grid_int:
-    type: Node
-    carrier: electricity
+  # ----------------- LOCATIONS -----------------
 
-  # A virtual Node that the demand draws from.
-  grid_int_demand:
-    type: Node
-    carrier: electricity
-
-  # The virtual demand Node can only consume from the internal grid.
-  grid_int_demand_conn:
+  bromberg:
+    type: Bromberg
+  
+  brunn:
+    type: Brunn
+  
+  kirchschlag:
+    type: Kirchschlag
+  
+  # The following connect all locations to the market (where the self-consumption penalty is applied)
+  metering_bromberg:
     type: Connection
-    node_from: grid_int
-    node_to: grid_int_demand
-    lb: 0
-
-  # --------------- GRID TARIFFS ----------------
-
-  grid_con_consume_limit:
-    type: Decision
-    lb: 0
-    ub: <grid_p_max_consume> - <grid_p_peak_consume>
-    cost: <grid_cost_p_consume>
-
-  grid_con_consume:
+    node_from: grid_market
+    node_to: bromberg.grid_ext
+  metering_brunn:
     type: Connection
-    node_from: grid_ext
-    node_to: grid_int
-    lb: 0
-    ub: <grid_p_peak_consume> + grid_con_consume_limit:value
-    cost: <grid_cost_e_consume>
-  
-  grid_con_feedin:
+    node_from: grid_market
+    node_to: brunn.grid_ext
+  metering_kirchschlag:
     type: Connection
-    node_from: grid_int
-    node_to: grid_ext
-    lb: 0
-    ub: <grid_p_max_feedin>
-    cost: <grid_cost_e_feedin>
-
-  # -------------------- PV ---------------------
-
-  pv:
-    type: Profile
-    carrier: electricity
-    node_to: grid_int
-    value: pv_s@data + pv_l@data
-  
-  # NOTE: `pv_***@data` can contain negative values (consumption), which is why we need to limit the remaining
-  #       `ub` using `max(0, ...)` to prevent infeasible models as soon as `ub = pv_***@@data < 0 = lb`.
-  pv_curtailment:
-    type: Profile
-    carrier: electricity
-    node_from: grid_int
-    mode: ranged
-    lb: 0
-    ub: <pv_curtailment_factor> * max(0, pv_s@data + pv_l@data)
-  
-  # ------------------ DEMAND -------------------
-
-  demand_total:
-    type: Profile
-    carrier: electricity
-    node_from: grid_int_demand
-    value: demand_s@data + demand_l@data + demand_g@data
-
-  # ------------------ BATTERY ------------------
-
-  battery_storage:
-    type: Node
-    carrier: electricity
-    has_state: true
-    state_lb: <battery_soc_min> * <battery_e>
-    state_ub: <battery_soc_max> * <battery_e>
-    state_percentage_loss: <battery_loss>
-    state_cyclic: geq
-    state_initial: <battery_soc_t0> * <battery_e>
-  
-  battery_charging:
-    type: Unit
-    inputs: {electricity: grid_int}
-    outputs: {electricity: battery_storage}
-    conversion: 1 electricity -> sqrt(<battery_eta>) electricity
-    marginal_cost: (<battery_vom> / 2.0) per in:electricity
-    capacity: <battery_p> in:electricity
-
-  battery_discharging:
-    type: Unit
-    inputs: {electricity: battery_storage}
-    outputs: {electricity: grid_int_demand}
-    conversion: 1.0 / sqrt(<battery_eta>) electricity -> 1 electricity
-    marginal_cost: (<battery_vom> / 2.0) per out:electricity
-    capacity: <battery_p> out:electricity
-
-  # ---------------- FEASIBILITY ----------------
-  
-  feasibility_create:
-    type: Profile
-    carrier: electricity
-    node_to: grid_int
-    mode: create
-    cost: 1000.0
-
-  feasibility_destroy:
-    type: Profile
-    carrier: electricity
-    node_from: grid_int
-    mode: destroy
-    cost: 1000.0
+    node_from: grid_market
+    node_to: kirchschlag.grid_ext

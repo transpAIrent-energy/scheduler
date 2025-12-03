@@ -32,25 +32,27 @@ from src.scheduler import get_day_ahead_schedule
 
 
 def make_example_data(count: int) -> pd.DataFrame:
-    """Returns a full day (24 hours as 96x 15 minutes) of example data for the day-ahead scheduling model.
+    """Returns `count` times 15 minutes of example data for the day-ahead scheduling model.
 
     The data includes:
     - Timestamps in 15-minute intervals
     - PV generation (small and large)
-    - Demand (small, large, and general)
+    - Demand (small, large, and other sites)
     - Day-ahead price data
 
     Returns:
-        pd.DataFrame: DataFrame with columns `time`, `pv_s`, `pv_l`, `demand_s`, `demand_l`, `demand_g`, and `price`.
+        pd.DataFrame: DataFrame with columns `time`, `pv_s`, `pv_l`, `demand_bromberg_s`, `demand_bromberg_l`,
+                      `demand_brunn`, `demand_kirchschlag`, and `price`.
     """
     rng = np.random.default_rng(seed=42)
     return pd.DataFrame(
         {
             "pv_s": rng.uniform(0, 330, count),
             "pv_l": rng.uniform(0, 1110, count),
-            "demand_s": rng.uniform(50, 300, count),
-            "demand_l": rng.uniform(0, 600, count),
-            "demand_g": rng.uniform(0, 150, count),
+            "demand_bromberg_s": rng.uniform(50, 300, count),
+            "demand_bromberg_l": rng.uniform(0, 600, count),
+            "demand_brunn": rng.uniform(0, 1800, count),
+            "demand_kirchschlag": rng.uniform(0, 450, count),
             "price": rng.uniform(0.02, 0.15, count),
         }
     )
@@ -60,6 +62,16 @@ if __name__ == "__main__":
     start_time = pd.Timestamp("2024-06-15 00:00:00")
     data = make_example_data(96)
     parameters = {
+        # initial conditions
+        "battery_soc_t0": 0.5,
+        "bromberg_grid_p_peak_consume": 0,
+        "brunn_grid_p_peak_consume": 0,
+        "kirchschlag_grid_p_peak_consume": 0,
+        # general parameters
+        "self_consumption_penalty": 0.005,
+        "battery_soc_softmin": 0.20,
+        "battery_soc_softmin_penalty": 0.05,
+        # battery parameters
         "battery_p": 1200.0,
         "battery_e": 5702.0,
         "battery_eta": 0.90,
@@ -67,13 +79,20 @@ if __name__ == "__main__":
         "battery_soc_min": 0.00,
         "battery_soc_max": 0.90,
         "battery_vom": 0.065,
-        "grid_p_max_consume": 1121.0,
-        "grid_p_max_feedin": 990.0,
-        "grid_cost_e_consume": 0.03324,
-        "grid_cost_e_feedin": 0.0,
-        "grid_cost_p_consume": 6.19633,
-        "battery_soc_t0": 0.5,
-        "grid_p_peak_consume": 0,
+        # grid tariff parameters (Bromberg)
+        "bromberg_grid_p_max_consume": 1121.0,
+        "bromberg_grid_p_max_feedin": 990.0,
+        "bromberg_grid_cost_e_consume": 0.03324,
+        "bromberg_grid_cost_e_feedin": 0.0,
+        "bromberg_grid_cost_p_consume": 74.356 / 12,
+        # grid tariff parameters (Brunn)
+        "brunn_grid_p_max_consume": 1800.0,          # TODO: check
+        "brunn_grid_cost_e_consume": 0.03242,
+        "brunn_grid_cost_p_consume": 63.796 / 12,
+        # grid tariff parameters (Kirchschlag)
+        "kirchschlag_grid_p_max_consume": 450.0,     # TODO: check
+        "kirchschlag_grid_cost_e_consume": 0.03324,
+        "kirchschlag_grid_cost_p_consume": 74.356 / 12,
     }
     config_path = str((Path(".") / "opt").resolve())
     data = normalize_to_eom(data, start_time)
